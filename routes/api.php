@@ -20,3 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('base-address',[IndexController::class,'baseAddress']);
+
+Route::post('roles',[IndexController::class,'updateRoles']);

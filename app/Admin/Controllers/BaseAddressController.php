@@ -92,6 +92,11 @@ class BaseAddressController extends AdminController
         "加密包CALL2" => "C_ENCRYPT_PACKET_CALL2",
         "加密包CALL4" => "C_ENCRYPT_PACKET_CALL4",
         "加密包CALL8" => "C_ENCRYPT_PACKET_CALL8",
+        "满血偏移" => "C_FULL_HP_OFFSET",
+        "满蓝偏移" => "C_FULL_MP_OFFSET",
+        "当前蓝量" => "C_CUR_MP",
+        "角色指针" => "C_ROLE_POINTER",
+        "帐号基址" => "C_ACCOUNT",
     ];
 
     /**
