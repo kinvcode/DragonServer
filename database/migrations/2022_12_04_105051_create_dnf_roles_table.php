@@ -15,15 +15,16 @@ class CreateDnfRolesTable extends Migration
     {
         Schema::create('dnf_roles', function (Blueprint $table) {
             $table->increments('id');
-            $table->bigInteger('account');
-            $table->bigInteger('role_id');
-            $table->string('name')->default('');
-            $table->integer('character');
-            $table->integer('advancement');
-            $table->integer('awakening');
-            $table->integer('level');
-            $table->integer('prestige');
-            $table->integer('position');
+            $table->tinyInteger('favorite')->default(0)->comment('偏爱栏');
+            $table->bigInteger('account')->nullable()->comment('账号');
+            $table->bigInteger('role_id')->nullable()->comment('角色ID');
+            $table->string('name')->nullable()->comment('名称');
+            $table->integer('character')->nullable()->comment('职业');
+            $table->integer('advancement')->nullable()->comment('转职职业');
+            $table->integer('awakening')->nullable()->comment('觉醒状态');
+            $table->integer('level')->nullable()->comment('等级');
+            $table->integer('prestige')->nullable()->comment('名望');
+            $table->integer('position')->nullable()->comment('角色栏位置');
             $table->timestamps();
         });
     }

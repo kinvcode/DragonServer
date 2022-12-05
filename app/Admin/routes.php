@@ -13,5 +13,6 @@ Route::group([
 ], function (Router $router) {
 
     $router->get('/', 'HomeController@index');
-    $router->resource('/base-address','BaseAddressController');
+    $router->resource('/base-address', 'BaseAddressController');
+    $router->resource('/roles', 'DnfRoleController');
 });

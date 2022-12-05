@@ -10,6 +10,14 @@ use Dcat\Admin\Http\Controllers\AdminController;
 
 class DnfRoleController extends AdminController
 {
+    public $character_map = [
+        0 => '鬼剑士',
+    ];
+
+    public $advancement_map = [
+        1 => '剑魂',
+    ];
+
     /**
      * Make a grid builder.
      *
@@ -20,20 +28,28 @@ class DnfRoleController extends AdminController
         return Grid::make(new DnfRole(), function (Grid $grid) {
             $grid->column('id')->sortable();
             $grid->column('account');
-            $grid->column('role_id');
+            $grid->column('role_id')->display(function ($role_id) {
+                return $role_id ?? '未获取';
+            });
             $grid->column('name');
             $grid->column('character');
             $grid->column('advancement');
-            $grid->column('awakening');
+            $grid->column('awakening')->display(function ($wake) {
+                if ($wake) {
+                    return $wake . '次觉醒';
+                } else {
+                    return '未觉醒';
+                }
+            });
             $grid->column('level');
             $grid->column('prestige');
             $grid->column('position');
             $grid->column('created_at');
             $grid->column('updated_at')->sortable();
-        
+
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
-        
+
             });
         });
     }
@@ -81,7 +97,7 @@ class DnfRoleController extends AdminController
             $form->text('level');
             $form->text('prestige');
             $form->text('position');
-        
+
             $form->display('created_at');
             $form->display('updated_at');
         });
