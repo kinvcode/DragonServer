@@ -10,10 +10,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class IndexController extends Controller
 {
-    public function baseAddress()
+    public function baseAddress(): JsonResponse
     {
-        $data = DB::table('base_address')->select(['const_name', 'address'])->get();
-        return new JsonResponse($data);
+        $data     = DB::table('base_address')->select(['const_name', 'address'])->get();
+        $response = [];
+        foreach ($data as $value) {
+            $response[$value->const_name] = $value->address;
+        }
+        return new JsonResponse($response);
     }
 
     public function updateRoles($favorite, Request $request)
@@ -49,5 +53,11 @@ class IndexController extends Controller
     public function updateFavoriteRoles(Request $request)
     {
         $this->updateRoles(1, $request);
+    }
+
+    public function townCoordinates(): JsonResponse
+    {
+        $data = DB::table('town_coordinates')->select(['name', 'word', 'area', 'x', 'y'])->get();
+        return new JsonResponse($data);
     }
 }

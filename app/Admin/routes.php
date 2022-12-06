@@ -13,6 +13,8 @@ Route::group([
 ], function (Router $router) {
 
     $router->get('/', 'HomeController@index');
-    $router->resource('/base-address', 'BaseAddressController');
-    $router->resource('/roles', 'DnfRoleController');
+    $router->resource('base-address', 'BaseAddressController');
+    $router->resource('roles', 'DnfRoleController');
+    $router->resource('town-coordinates','TownCoordinateController');
+    $router->resource('dungeons','DungeonController');
 });
