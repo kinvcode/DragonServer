@@ -23,3 +23,5 @@ Route::get('base-address', [IndexController::class, 'baseAddress']);
 Route::post('general-roles', [IndexController::class, 'updateGeneralRoles']);
 Route::post('favorite-roles', [IndexController::class, 'updateFavoriteRoles']);
 Route::get('town-coordinates', [IndexController::class, 'townCoordinates']);
+Route::get('account/{id}/jobs', [IndexController::class, 'jobs']);
+Route::post('role/id',[IndexController::class,'updateRoleID']);

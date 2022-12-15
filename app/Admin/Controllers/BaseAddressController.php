@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Repositories\BaseAddress;
+use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Layout\Content;
@@ -110,6 +111,10 @@ class BaseAddressController extends AdminController
         "最大负重"     => "C_MAX_WEIGHT",
         "背包基址"     => "C_PACKAGE_ADDRESS",
         "装备品级"     => "C_EQ_GRADE",
+        "角色基址"     => "C_ROLE_ADDRESS",
+        "角色初始指针" => "C_ROLE_INIT_P",
+        "偏爱角色位置" => "C_FAVORITE_ROLE_POS",
+        "普通角色位置" => "C_COMMON_ROLE_POS",
     ];
 
     /**
