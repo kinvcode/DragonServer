@@ -83,8 +83,9 @@ class RoleJobController extends Controller
         }
 
         try {
+            $dnf_date = date('Y-m-d',strtotime('-6 hours'));
             $account = DB::table('dnf_roles')->where('role_id', $role_id)->first()->account;
-            DB::table('account_jobs')->where('account', $account)->delete();
+            DB::table('account_jobs')->where('account', $account)->where('job_date', $dnf_date)->delete();
             DB::table('jobs')->where('type', 1)->where('role_id', $role_id)->delete();
             DB::table('jobs')->insert($save_data);
         } catch (\Exception $e) {

@@ -115,6 +115,7 @@ class BaseAddressController extends AdminController
         "角色初始指针" => "C_ROLE_INIT_P",
         "偏爱角色位置" => "C_FAVORITE_ROLE_POS",
         "普通角色位置" => "C_COMMON_ROLE_POS",
+        "装备名望"     => "C_EQ_PRESTIGE",
     ];
 
     /**

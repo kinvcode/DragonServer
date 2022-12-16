@@ -82,8 +82,8 @@ class IndexController extends Controller
     // 获取任务队列
     public function jobs($id)
     {
-        $date = date('Y-m-d');
-        $data = DB::table('account_jobs')->where('account', $id)->where('job_date', $date)->first();
+        $dnf_date = date('Y-m-d', strtotime('-6 hours'));
+        $data     = DB::table('account_jobs')->where('account', $id)->where('job_date', $dnf_date)->first();
         if ($data !== null) {
             return new JsonResponse(json_decode($data->raw, true));
         }
@@ -129,10 +129,10 @@ class IndexController extends Controller
         }
 
         // 任务排序
-        foreach ($jobs_map as $key=>$value){
+        foreach ($jobs_map as $key => $value) {
             ksort($value);
             $jobs_map[$key] = [];
-            foreach ($value as $val){
+            foreach ($value as $val) {
                 $jobs_map[$key][] = $val;
             }
         }
@@ -141,7 +141,7 @@ class IndexController extends Controller
         $response = [];
         foreach ($roles as $value) {
             if (isset($jobs_map[$value->role_id])) {
-                $jobs = $jobs_map[$value->role_id];
+                $jobs       = $jobs_map[$value->role_id];
                 $response[] = [
                     'jobs' => $jobs,
                     'role' => [
@@ -151,11 +151,12 @@ class IndexController extends Controller
                 ];
             }
         }
-        AccountJob::create(['account' => $id, 'job_date' => $date, 'raw' => json_encode($response)]);
 
+        AccountJob::create(['account' => $id, 'job_date' => $dnf_date, 'raw' => json_encode($response)]);
         return new JsonResponse($response);
     }
 
+    // 更新角色ID
     public function updateRoleID(Request $request)
     {
         $data = $request->all();
@@ -169,5 +170,56 @@ class IndexController extends Controller
             DB::table('dnf_roles')->where('account', $data['account'])->where('name', $data['name'])->update(['role_id' => $data['id']]);
         }
 
+    }
+
+    // 更新账号任务
+    public function updateAccountJob($id, Request $request)
+    {
+        $type = (int)$request->input('type');
+        if (!in_array($type, [0, 1])) {
+            abort(400);
+        }
+
+        $dnf_date = date('Y-m-d', strtotime('-6 hours'));
+        $jobs     = DB::table('account_jobs')->where('account', $id)->where('job_date', $dnf_date)->first();
+        $jobs = json_decode($jobs->raw, true);
+        if(isset($jobs[0])){
+            $role_jobs = &$jobs[0]["jobs"];
+            if(isset($role_jobs[0])){
+                $cur_job = &$role_jobs[0];
+                if($cur_job["type"] === $type){
+                    switch ($type){
+                        case 0:
+                            $data = &$cur_job["data"];
+                            if(count($data) > 0){
+                                $data[0]["times"] -= 1;
+                                if($data[0]["times"] == 0){
+                                    array_shift($data);
+                                    if(count($data) < 1){
+                                        array_shift($role_jobs);
+                                        if(count($role_jobs) < 1){
+                                            array_shift($jobs);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        case 1:
+                            break;
+                        default:
+                            abort(400);
+                    }
+                }
+            }
+        }
+
+        try {
+            DB::table('account_jobs')
+                ->where('account', $id)
+                ->where('job_date', $dnf_date)
+                ->update(['raw'=>json_encode($jobs)]);
+        }catch (\Exception $e){
+            abort(500);
+        }
     }
 }
