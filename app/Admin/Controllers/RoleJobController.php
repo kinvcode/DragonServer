@@ -52,7 +52,7 @@ class RoleJobController extends Controller
             return admin_redirect(admin_url('roles'));
         }
 
-        $jobs = $request->input('strategies');
+        $jobs = (array)$request->input('strategies');
         foreach ($jobs as $key => $value) {
             if ($value['_remove_'] == '1') {
                 unset($jobs[$key]);
@@ -61,8 +61,13 @@ class RoleJobController extends Controller
 
         if (count($jobs) < 1) {
             DB::table('jobs')->where('type', 1)->where('role_id', $role_id)->delete();
-            return Response::make()->success('任务已清空')->location('roles');
+            $account = DB::table('dnf_roles')->where('role_id', $role_id)->value('account');
+            $url     = '/account/' . $account;
+            return Response::make()->success('任务已清空')->location($url);
         }
+
+        $account = DB::table('dnf_roles')->where('role_id', $role_id)->first()->account;
+
         $date      = date('Y-m-d H:i:s');
         $save_data = [];
         $index     = 0;
@@ -71,20 +76,19 @@ class RoleJobController extends Controller
                 return Response::make()->info('任务策略不能为空');
             }
             $save_data[] = [
-                'strategy_id' => $value['job'],
-                'sort'        => $index,
-                'type'        => 1,
-                'role_id'     => $role_id,
-                'created_at'  => $date,
-                'updated_at'  => $date,
-
+                'strategy_id'  => $value['job'],
+                'sort'         => $index,
+                'type'         => 1,
+                'role_id'      => $role_id,
+                'role_account' => $account,
+                'created_at'   => $date,
+                'updated_at'   => $date,
             ];
             $index++;
         }
 
         try {
-            $dnf_date = date('Y-m-d',strtotime('-6 hours'));
-            $account = DB::table('dnf_roles')->where('role_id', $role_id)->first()->account;
+            $dnf_date = date('Y-m-d', strtotime('-6 hours'));
             DB::table('account_jobs')->where('account', $account)->where('job_date', $dnf_date)->delete();
             DB::table('jobs')->where('type', 1)->where('role_id', $role_id)->delete();
             DB::table('jobs')->insert($save_data);
@@ -92,6 +96,8 @@ class RoleJobController extends Controller
             return Response::make()->error('创建失败！');
         }
 
-        return Response::make()->success('创建成功')->location('roles');
+        $account = DB::table('dnf_roles')->where('role_id', $role_id)->value('account');
+        $url     = '/account/' . $account;
+        return Response::make()->success('创建成功')->location($url);
     }
 }

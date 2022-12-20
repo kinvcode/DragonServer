@@ -96,7 +96,7 @@ class IndexController extends Controller
         }
 
         // 获取账号下所有角色
-        $roles    = DB::table('dnf_roles')->where('account', $id)->get();
+        $roles    = DB::table('dnf_roles')->where('account', $id)->orderBy('position')->get();
         $roles_id = $roles->pluck('role_id');
 
         if ($roles->isEmpty()) {
@@ -205,6 +205,10 @@ class IndexController extends Controller
                             }
                             break;
                         case 1:
+                            array_shift($role_jobs);
+                            if(count($role_jobs) < 1){
+                                array_shift($jobs);
+                            }
                             break;
                         default:
                             abort(400);

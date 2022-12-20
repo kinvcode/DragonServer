@@ -13,20 +13,53 @@ Route::group([
 ], function (Router $router) {
 
     $router->get('/', 'HomeController@index');
-    $router->resource('base-address', 'BaseAddressController');
-    $router->resource('roles', 'DnfRoleController')->except(['edit', 'update', 'destroy']);
-    $router->get('role/master', 'DnfRoleController@masterJob');
-    $router->match(['POST','PUT'],'role/master', 'DnfRoleController@saveMasterJob');
-    $router->get('options/job', 'DnfRoleController@jobOptions');
-    $router->resource('town-coordinates', 'TownCoordinateController');
-    $router->resource('dungeons', 'DungeonController');
-    $router->resource('jobs', 'JobController');
-    $router->resource('job/strategies', 'JobStrategyController');
-    $router->resource('accounts', 'DnfAccountController');
 
+    // 基址管理
+    $router->resource('base-address', 'BaseAddressController');
+    // 七度基址表单
+    $router->get('address/qidu', 'BaseAddressController@qiduForm');
+    $router->post('address/qidu', 'BaseAddressController@updateQidu');
+    // 心悦基址表单
+    $router->get('address/xinyue', 'BaseAddressController@xinyueForm');
+    $router->post('address/xinyue', 'BaseAddressController@updateXinyue');
+
+    // 城镇列表
+    $router->resource('town-coordinates', 'TownCoordinateController');
+
+    // 副本列表
+    $router->resource('dungeons', 'DungeonController');
+
+    // 账号管理
+    $router->resource('accounts', 'DnfAccountController');
+    // 账号角色
+    $router->get('account/{qq}','DnfAccountController@accounts');
+
+    // 角色管理
+    $router->resource('roles', 'DnfRoleController')->except(['edit', 'update', 'destroy']);
+
+    // 策略管理
+    $router->resource('job/strategies', 'JobStrategyController');
+
+    // 刷图策略
     $router->get('strategy/dungeon', 'JobStrategyController@dungeon');
     $router->post('strategy/dungeon', 'JobStrategyController@saveDungeon');
+
+    // 剧情策略
+    $router->get('strategy/mainline', 'JobStrategyController@mainline');
+    $router->post('strategy/mainline', 'JobStrategyController@saveMainline');
+
+    // 角色任务
+    $router->get('role/{role_id}/job', 'RoleJobController@editJob');
+    $router->put('role/{role_id}/job', 'RoleJobController@updateJob');
+
+    // 策略选项列表
+    $router->get('options/job', 'DnfRoleController@jobOptions');
+    // 地图选项
     $router->get('map-options', 'JobStrategyController@mapOptions');
-    $router->get('role/{role_id}/job','RoleJobController@editJob');
-    $router->put('role/{role_id}/job','RoleJobController@updateJob');
+
+    // 全局策略（暂时不可用）
+    $router->get('role/master', 'DnfRoleController@masterJob');
+    $router->match(['POST', 'PUT'], 'role/master', 'DnfRoleController@saveMasterJob');
+    // 暂时无用
+    $router->resource('jobs', 'JobController');
 });

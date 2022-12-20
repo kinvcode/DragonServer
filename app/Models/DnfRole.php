@@ -12,4 +12,9 @@ class DnfRole extends Model
 
     protected $table = 'dnf_roles';
     protected $fillable = ['favorite', 'account', 'role_id', 'name', 'character', 'advancement', 'awakening', 'level', 'prestige', 'position'];
+
+    public function jobs()
+    {
+        return $this->hasMany(Job::class, 'role_id', 'role_id');
+    }
 }

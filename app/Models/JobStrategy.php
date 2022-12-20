@@ -10,5 +10,5 @@ class JobStrategy extends Model
 {
 	use HasDateTimeFormatter;
     protected $table = 'job_strategies';
-    
+    protected $fillable = ['type','name','raw','created_at','updated_at'];
 }

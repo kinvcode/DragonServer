@@ -26,21 +26,30 @@ class JobStrategyController extends AdminController
     protected function grid()
     {
         $type_map = [
-            1 => '刷图',
-            2 => '剧情',
+            0 => '刷图',
+            1 => '剧情',
         ];
 
-        return Grid::make(new JobStrategy(), function (Grid $grid) {
-            $dungeon = <<<STR
+        return Grid::make(new JobStrategy(), function (Grid $grid) use ($type_map) {
+            $dungeon   = <<<STR
 <a href="/admin/strategy/dungeon" class="btn btn-primary">
     <i class="feather icon-plus"></i><span class="d-none d-sm-inline">&nbsp;&nbsp;刷图策略</span>
 </a>
 STR;
+            $main_line = <<<STR2
+<a href="/admin/strategy/mainline" class="btn btn-primary">
+    <i class="feather icon-plus"></i><span class="d-none d-sm-inline">&nbsp;&nbsp;剧情策略</span>
+</a>
+STR2;
+
             $grid->toolsWithOutline(false);
             $grid->disableCreateButton();
             $grid->tools($dungeon);
+            $grid->tools($main_line);
             $grid->column('id')->sortable();
-            $grid->column('type');
+            $grid->column('type')->display(function ($type) use ($type_map) {
+                return $type_map[$type];
+            });
             $grid->column('name');
             $grid->column('created_at');
             $grid->column('updated_at')->sortable();
@@ -118,7 +127,7 @@ STR;
 
             $form->table('map', '刷图地图', function ($table) {
                 $table->select('dungeon', '地图')->options('/map-options');
-                $table->number('numbers', '次数')->min(0);
+                $table->number('numbers', '次数')->min(-1);
             })->saving(function ($v) {
                 return json_encode($v);
             });
@@ -184,6 +193,43 @@ STR;
             return Response::make()->error('创建失败！');
         }
 
+        return Response::make()->success('创建成功')->location('job/strategies');
+    }
+
+    // 主线剧情编辑界面
+    public function mainline(Content $content)
+    {
+        $form = Form::make(null, function (Form $form) {
+            $form->disableHeader();
+            $form->disableEditingCheck();
+            $form->disableCreatingCheck();
+            $form->disableViewCheck();
+
+            $form->text('name', '策略名称')->maxLength(100)->required();
+        });
+
+        $form->action('strategy/mainline');
+
+        return $content
+            ->title('创建刷图策略')
+            ->description()
+            ->body($form);
+    }
+
+    // 保存剧情策略
+    public function saveMainline(Request $request)
+    {
+        $name = $request->input('name');
+        $data = [
+            'type' => 1,
+            'name' => $name,
+            'raw'  => json_encode([]),
+        ];
+        try {
+            \App\Models\JobStrategy::create($data);
+        } catch (\Exception $e) {
+            return Response::make()->error('创建失败！');
+        }
         return Response::make()->success('创建成功')->location('job/strategies');
     }
 }
