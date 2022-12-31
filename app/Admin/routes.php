@@ -48,6 +48,10 @@ Route::group([
     $router->get('strategy/mainline', 'JobStrategyController@mainline');
     $router->post('strategy/mainline', 'JobStrategyController@saveMainline');
 
+    // 每日任务策略
+    $router->get('strategy/daily','JobStrategyController@daily');
+    $router->post('strategy/daily','JobStrategyController@saveDaily');
+
     // 角色任务
     $router->get('role/{role_id}/job', 'RoleJobController@editJob');
     $router->put('role/{role_id}/job', 'RoleJobController@updateJob');

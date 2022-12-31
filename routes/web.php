@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+    $data = $GLOBALS;
+//    phpinfo();
     dump(date('Y-m-d H:i:s'));
 //    return view('welcome');
 });

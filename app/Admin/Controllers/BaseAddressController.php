@@ -139,7 +139,14 @@ class BaseAddressController extends AdminController
         "接受CALL"       => "C_ACCEPT_CALL",
         "数量偏移"       => "C_ITEM_NUM",
         "物品代码"       => "C_ITEM_CODE",
-        "任务副本"       => "C_JOB_MAP"
+        "任务副本"       => "C_JOB_MAP",
+        "角色大区"       => "C_SERVER_AREA",
+        "最大耐久"       => "C_MAX_DURABLE",
+        "武器偏移"       => "C_WEAPON_OFFSET",
+        "上衣偏移"       => "C_COAT_OFFSET",
+        "头肩偏移"       => "C_SHOULDER_OFFSET",
+        "下装偏移"       => "C_BOTTOMS_OFFSET",
+        "腰带偏移"       => "C_BELT_OFFSET",
     ];
 
     protected $xinyue = [

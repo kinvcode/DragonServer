@@ -35,6 +35,7 @@ class IndexController extends Controller
             $role_info = [
                 'favorite'    => $favorite,
                 'account'     => $value['account'] ?? null,
+                'server'      => $value['server'] ?? null,
                 'name'        => $value['name'] ?? null,
                 'character'   => $value['character'] ?? null,
                 'advancement' => $value['advancement'] ?? null,
@@ -43,7 +44,12 @@ class IndexController extends Controller
                 'prestige'    => $value['prestige'] ?? null,
                 'position'    => $value['position'] ?? null,
             ];
-            $exists    = DB::table('dnf_roles')->where('name', $role_info['name'])->exists();
+            Log::info('角色信息：',$role_info);
+            $exists    = DB::table('dnf_roles')
+                ->where('account', $role_info['account'])
+                ->where('server', $role_info['server'])
+                ->where('name', $role_info['name'])
+                ->exists();
             if ($exists) {
                 DnfRole::where('name', $role_info['name'])->update($role_info);
             } else {
@@ -80,10 +86,17 @@ class IndexController extends Controller
     }
 
     // 获取任务队列
-    public function jobs($id)
+    public function jobs($id,Request $request)
     {
+        $server = $request->input('server');
+        $data = $request->all();
+        Log::info('请求任务：',$data);
         $dnf_date = date('Y-m-d', strtotime('-6 hours'));
-        $data     = DB::table('account_jobs')->where('account', $id)->where('job_date', $dnf_date)->first();
+        $data     = DB::table('account_jobs')
+            ->where('account', $id)
+            ->where('server', $server)
+            ->where('job_date', $dnf_date)
+            ->first();
         if ($data !== null) {
             return new JsonResponse(json_decode($data->raw, true));
         }
@@ -95,15 +108,17 @@ class IndexController extends Controller
             return new JsonResponse($data);
         }
 
-        // 获取账号下所有角色
-        $roles    = DB::table('dnf_roles')->where('account', $id)->orderBy('position')->get();
-        $roles_id = $roles->pluck('role_id');
-
+        // 获取账号下所有角色[一个大区]
+        $roles    = DB::table('dnf_roles')
+            ->where('account', $id)
+            ->where('server',$server)
+            ->orderBy('position')
+            ->get();
+        $roles_id = $roles->pluck('id');
         if ($roles->isEmpty()) {
             // 如果没有角色
             return new JsonResponse($data);
         }
-
 
         $jobs = DB::table('jobs')->whereIn('role_id', $roles_id)->get();
         if ($jobs->isEmpty()) {
@@ -136,12 +151,11 @@ class IndexController extends Controller
                 $jobs_map[$key][] = $val;
             }
         }
-
         // 合并结果
         $response = [];
         foreach ($roles as $value) {
-            if (isset($jobs_map[$value->role_id])) {
-                $jobs       = $jobs_map[$value->role_id];
+            if (isset($jobs_map[$value->id])) {
+                $jobs       = $jobs_map[$value->id];
                 $response[] = [
                     'jobs' => $jobs,
                     'role' => [
@@ -151,7 +165,6 @@ class IndexController extends Controller
                 ];
             }
         }
-
         AccountJob::create(['account' => $id, 'job_date' => $dnf_date, 'raw' => json_encode($response)]);
         return new JsonResponse($response);
     }
@@ -166,9 +179,9 @@ class IndexController extends Controller
         }
 
         $role_id = DB::table('dnf_roles')->where('account', $data['account'])->where('name', $data['name'])->value('role_id');
-        if (empty($role_id)) {
-            DB::table('dnf_roles')->where('account', $data['account'])->where('name', $data['name'])->update(['role_id' => $data['id']]);
-        }
+//        if (empty($role_id)) {
+        DB::table('dnf_roles')->where('account', $data['account'])->where('name', $data['name'])->update(['role_id' => $data['id']]);
+//        }
 
     }
 
@@ -176,28 +189,28 @@ class IndexController extends Controller
     public function updateAccountJob($id, Request $request)
     {
         $type = (int)$request->input('type');
-        if (!in_array($type, [0, 1])) {
+        if (!in_array($type, [0, 1, 2])) {
             abort(400);
         }
 
         $dnf_date = date('Y-m-d', strtotime('-6 hours'));
         $jobs     = DB::table('account_jobs')->where('account', $id)->where('job_date', $dnf_date)->first();
-        $jobs = json_decode($jobs->raw, true);
-        if(isset($jobs[0])){
+        $jobs     = json_decode($jobs->raw, true);
+        if (isset($jobs[0])) {
             $role_jobs = &$jobs[0]["jobs"];
-            if(isset($role_jobs[0])){
+            if (isset($role_jobs[0])) {
                 $cur_job = &$role_jobs[0];
-                if($cur_job["type"] === $type){
-                    switch ($type){
+                if ($cur_job["type"] === $type) {
+                    switch ($type) {
                         case 0:
                             $data = &$cur_job["data"];
-                            if(count($data) > 0){
+                            if (count($data) > 0) {
                                 $data[0]["times"] -= 1;
-                                if($data[0]["times"] == 0){
+                                if ($data[0]["times"] == 0 || $data[0]["times"] == -1) {
                                     array_shift($data);
-                                    if(count($data) < 1){
+                                    if (count($data) < 1) {
                                         array_shift($role_jobs);
-                                        if(count($role_jobs) < 1){
+                                        if (count($role_jobs) < 1) {
                                             array_shift($jobs);
                                         }
                                     }
@@ -205,8 +218,10 @@ class IndexController extends Controller
                             }
                             break;
                         case 1:
+                        case 2:
+//                            Log::info('当前任务已完成',['job_type'=>$type]);
                             array_shift($role_jobs);
-                            if(count($role_jobs) < 1){
+                            if (count($role_jobs) < 1) {
                                 array_shift($jobs);
                             }
                             break;
@@ -221,8 +236,8 @@ class IndexController extends Controller
             DB::table('account_jobs')
                 ->where('account', $id)
                 ->where('job_date', $dnf_date)
-                ->update(['raw'=>json_encode($jobs)]);
-        }catch (\Exception $e){
+                ->update(['raw' => json_encode($jobs)]);
+        } catch (\Exception $e) {
             abort(500);
         }
     }

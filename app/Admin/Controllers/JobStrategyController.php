@@ -28,6 +28,7 @@ class JobStrategyController extends AdminController
         $type_map = [
             0 => '刷图',
             1 => '剧情',
+            2 => '每日任务',
         ];
 
         return Grid::make(new JobStrategy(), function (Grid $grid) use ($type_map) {
@@ -41,11 +42,17 @@ STR;
     <i class="feather icon-plus"></i><span class="d-none d-sm-inline">&nbsp;&nbsp;剧情策略</span>
 </a>
 STR2;
+            $daily = <<<STR3
+<a href="/admin/strategy/daily" class="btn btn-primary">
+    <i class="feather icon-plus"></i><span class="d-none d-sm-inline">&nbsp;&nbsp;每日任务策略</span>
+</a>
+STR3;
 
             $grid->toolsWithOutline(false);
             $grid->disableCreateButton();
             $grid->tools($dungeon);
             $grid->tools($main_line);
+            $grid->tools($daily);
             $grid->column('id')->sortable();
             $grid->column('type')->display(function ($type) use ($type_map) {
                 return $type_map[$type];
@@ -231,5 +238,41 @@ STR2;
             return Response::make()->error('创建失败！');
         }
         return Response::make()->success('创建成功')->location('job/strategies');
+    }
+
+    public function daily(Content $content)
+    {
+        $form = Form::make(null, function (Form $form) {
+            $form->disableHeader();
+            $form->disableEditingCheck();
+            $form->disableCreatingCheck();
+            $form->disableViewCheck();
+
+            $form->text('name', '策略名称')->maxLength(100)->required();
+        });
+
+        $form->action('strategy/daily');
+
+        return $content
+            ->title('创建每日任务策略')
+            ->description()
+            ->body($form);
+    }
+
+    public function saveDaily(Request $request)
+    {
+        $name = $request->input('name');
+        $data = [
+            'type' => 2,
+            'name' => $name,
+            'raw'  => json_encode([]),
+        ];
+        try {
+            \App\Models\JobStrategy::create($data);
+        } catch (\Exception $e) {
+            return Response::make()->error('创建失败！');
+        }
+        return Response::make()->success('创建成功')->location('job/strategies');
+
     }
 }

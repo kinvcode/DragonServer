@@ -188,9 +188,10 @@ STR;
 
             $grid->column('id')->sortable();
             $grid->column('account');
-            $grid->column('role_id')->display(function ($role_id) {
-                return $role_id ?? '未获取';
-            });
+            $grid->column('server');
+//            $grid->column('role_id')->display(function ($role_id) {
+//                return $role_id ?? '未获取';
+//            });
             $grid->column('name');
             $grid->column('character')->display(function ($role) use ($map1) {
                 if (isset($map1[$role])) {

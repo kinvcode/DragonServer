@@ -61,13 +61,14 @@ class RoleJobController extends Controller
 
         if (count($jobs) < 1) {
             DB::table('jobs')->where('type', 1)->where('role_id', $role_id)->delete();
-            $account = DB::table('dnf_roles')->where('role_id', $role_id)->value('account');
+            $account = DB::table('dnf_roles')->where('id', $role_id)->value('account');
             $url     = '/account/' . $account;
             return Response::make()->success('任务已清空')->location($url);
         }
 
-        $account = DB::table('dnf_roles')->where('role_id', $role_id)->first()->account;
-
+        $role_first =  DB::table('dnf_roles')->where('id', $role_id)->first();
+        $account = $role_first->account;
+        $server = $role_first->server;
         $date      = date('Y-m-d H:i:s');
         $save_data = [];
         $index     = 0;
@@ -89,7 +90,11 @@ class RoleJobController extends Controller
 
         try {
             $dnf_date = date('Y-m-d', strtotime('-6 hours'));
-            DB::table('account_jobs')->where('account', $account)->where('job_date', $dnf_date)->delete();
+            DB::table('account_jobs')
+                ->where('account', $account)
+                ->where('server', $server)
+                ->where('job_date', $dnf_date)
+                ->delete();
             DB::table('jobs')->where('type', 1)->where('role_id', $role_id)->delete();
             DB::table('jobs')->insert($save_data);
         } catch (\Exception $e) {

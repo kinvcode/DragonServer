@@ -77,10 +77,11 @@ STR;
         $grid = Grid::make(new DnfRole(['jobs']), function (Grid $grid) use ($qq) {
             $grid->model()
                 ->where('account', $qq)
-                ->where('role_id', '<>', '')
+//                ->where('role_id', '<>', '')
                 ->orderBy('position');
 
-            $grid->column('role_id');
+            $grid->column('server');
+            $grid->column('id');
             $grid->column('position');
             $grid->column('name');
             $grid->column('strategy', '策略')->display(function () {
@@ -98,7 +99,7 @@ STR;
             $grid->disableViewButton();
 
             $grid->actions(function (Grid\Displayers\Actions $actions) {
-                $role_id = (int)$this->role_id;
+                $role_id = (int)$this->id;
                 // append一个操作
                 $actions->append('<a href="/admin/role/' . $role_id . '/job"><i class="feather icon-edit"></i>配置任务</a>');
             });

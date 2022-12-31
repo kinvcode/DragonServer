@@ -19,14 +19,14 @@ class DungeonController extends AdminController
     {
         return Grid::make(new Dungeon(), function (Grid $grid) {
             $grid->column('id')->sortable();
-            $grid->column('name');
-            $grid->column('code');
+            $grid->column('name')->sortable();
+            $grid->column('code')->sortable();
             $grid->column('created_at');
             $grid->column('updated_at')->sortable();
-        
+
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
-        
+
             });
         });
     }
@@ -60,7 +60,7 @@ class DungeonController extends AdminController
             $form->display('id');
             $form->text('name');
             $form->text('code');
-        
+
             $form->display('created_at');
             $form->display('updated_at');
         });
