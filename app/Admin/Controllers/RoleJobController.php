@@ -101,7 +101,7 @@ class RoleJobController extends Controller
             return Response::make()->error('创建失败！');
         }
 
-        $account = DB::table('dnf_roles')->where('role_id', $role_id)->value('account');
+        $account = DB::table('dnf_roles')->where('id', $role_id)->value('account');
         $url     = '/account/' . $account;
         return Response::make()->success('创建成功')->location($url);
     }
